@@ -1,0 +1,6 @@
+---
+include:
+  - board: xiao_ble
+    shield: kimiboard_ec
+  - board: xiao_ble
+    shield: settings_reset

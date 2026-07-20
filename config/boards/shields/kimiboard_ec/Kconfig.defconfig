@@ -1,0 +1,28 @@
+if SHIELD_KIMIBOARD_EC
+
+config ZMK_KEYBOARD_NAME
+    default "KimiBoard EC"
+
+# トラックボール(ポインティングデバイス)を有効化
+config ZMK_POINTING
+    default y
+
+# ロータリーエンコーダーを有効化
+config EC11
+    default y
+
+config EC11_TRIGGER_GLOBAL_THREAD
+    default y
+
+# SPI / GPIO入力サブシステム
+config SPI
+    default y
+
+config INPUT
+    default y
+
+# PMW3610センサードライバ
+config PMW3610
+    default y
+
+endif # SHIELD_KIMIBOARD_EC

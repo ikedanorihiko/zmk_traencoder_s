@@ -1,0 +1,11 @@
+file_format: "1"
+id: kimiboard_ec
+name: KimiBoard EC (KimiBoard-inspired trackball + encoder module)
+type: shield
+requires: [seeeduino_xiao_ble]
+features:
+  - keys
+  - pointing
+  - encoder
+siblings:
+  - kimiboard_ec

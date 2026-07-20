@@ -1,0 +1,2 @@
+config SHIELD_KIMIBOARD_EC
+    def_bool $(shields_list_contains,kimiboard_ec)

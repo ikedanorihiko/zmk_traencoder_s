@@ -1,0 +1,116 @@
+/*
+ * KimiBoard EC - KimiBoard風トラックボールモジュール + ロータリーエンコーダー
+ *
+ * !!! 重要 !!!
+ * 以下のピン番号 (&xiao_d N) はすべて「仮の値」です。
+ * 実際の基板・配線に合わせて必ず書き換えてください。
+ * XIAO nRF52840 (XIAO BLE) の D0〜D10 に対応する &xiao_d N 表記を使っています。
+ *
+ * 想定している配線 (要調整):
+ *   D0 : (未使用 / 予備)
+ *   D1 : キー1 (元のKimiBoardの1キー相当)
+ *   D2 : キー2 (元のKimiBoardの2キー相当)
+ *   D3 : キー3 (元のKimiBoardの3キー相当)
+ *   D4 : タクトスイッチ (元のKimiBoardの0キー = Bluetooth切替用)
+ *   D5 : エンコーダー A相 (新規追加)
+ *   D6 : エンコーダー B相 (新規追加)
+ *   D7 : PMW3610 CS (SPI チップセレクト)
+ *   D8 : SPI SCK (XIAO BLEのデフォルトSPIピン)
+ *   D9 : SPI MOSI
+ *   D10: SPI MISO
+ *   D0 (予備) : PMW3610 モーション割り込み(MOTION/INTピン)を別途割り当てる場合はここ等に変更
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+    };
+
+    // ----------------------------------------------------
+    // キースイッチ + タクトスイッチ (マトリクスなしの直結GPIO)
+    // ----------------------------------------------------
+    kscan0: kscan_0 {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+        input-gpios
+            = <&xiao_d 4 GPIO_ACTIVE_LOW>  // index 0: タクトスイッチ (旧0キー / BT切替用)
+            , <&xiao_d 1 GPIO_ACTIVE_LOW>  // index 1: キー1
+            , <&xiao_d 2 GPIO_ACTIVE_LOW>  // index 2: キー2
+            , <&xiao_d 3 GPIO_ACTIVE_LOW>  // index 3: キー3
+            ;
+    };
+
+    // ----------------------------------------------------
+    // 4キー、1行4列のマトリクス変換 (物理的な並びは自由に調整可)
+    // ----------------------------------------------------
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        columns = <4>;
+        rows = <1>;
+        map = <
+            RC(0,0) RC(0,1) RC(0,2) RC(0,3)
+        >;
+    };
+
+    // ----------------------------------------------------
+    // ロータリーエンコーダー (新規追加分)
+    // ----------------------------------------------------
+    encoder: encoder {
+        compatible = "alps,ec11";
+        label = "ENCODER";
+        a-gpios = <&xiao_d 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        b-gpios = <&xiao_d 6 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
+        resolution = <4>;
+        status = "okay";
+    };
+
+    sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&encoder>;
+    };
+};
+
+// ----------------------------------------------------
+// PMW3610 トラックボールセンサー (SPI接続)
+// XIAO BLEのデフォルトSPI3 (D8=SCK, D9=MOSI, D10=MISO) を使用する想定。
+// ボードのデフォルトpinctrlで足りない場合は、
+// boards/seeeduino_xiao_ble.overlay 側でpinctrlを追加してください。
+// ----------------------------------------------------
+&spi3 {
+    status = "okay";
+    cs-gpios = <&xiao_d 7 GPIO_ACTIVE_LOW>;
+
+    trackball: trackball@0 {
+        compatible = "pixart,pmw3610";
+        status = "okay";
+        reg = <0>;
+        spi-max-frequency = <2000000>;
+
+        // モーション割り込みピン。空いているピンに合わせて要変更。
+        irq-gpios = <&xiao_d 0 GPIO_ACTIVE_LOW>;
+
+        // 19mmボール + PMW3610の一般的な運用値。感度は用途に応じて調整。
+        cpi = <800>;
+
+        // 実装の向きに応じて反転が必要な場合はコメントを外す
+        // swap-xy;
+        // invert-x;
+        // invert-y;
+    };
+};
+
+#include <input/processors.dtsi>
+
+/ {
+    // トラックボールを ZMK のポインティングデバイスとして登録
+    // input-processors: ボールを動かすと自動でレイヤー1(マウスレイヤー)に
+    //   切り替わり、10秒間操作がなければ自動で元に戻る(zip_temp_layer 1 10000)
+    kimiboard_listener: kimiboard_listener {
+        compatible = "zmk,input-listener";
+        device = <&trackball>;
+        input-processors = <&zip_temp_layer 1 10000>;
+    };
+};
