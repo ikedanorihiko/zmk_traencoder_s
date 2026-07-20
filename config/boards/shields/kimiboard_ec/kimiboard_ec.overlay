@@ -80,7 +80,7 @@
 // boards/seeeduino_xiao_ble.overlay 側でpinctrlを追加してください。
 // ----------------------------------------------------
 &spi3 {
-    status = "okay";
+    status = "disabled";
     cs-gpios = <&xiao_d 7 GPIO_ACTIVE_LOW>;
 
     trackball: trackball@0 {
