@@ -78,10 +78,6 @@
 
 
 
-
-
-
-#include "myball.dtsi"
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 /*
