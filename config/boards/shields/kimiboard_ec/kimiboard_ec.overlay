@@ -99,6 +99,10 @@
         // swap-xy;
         // invert-x;
         // invert-y;
+
+    zephyr,axis-x = <&mouse_x>;
+    zephyr,axis-y = <&mouse_y>;
+
     };
 };
 
