@@ -80,7 +80,7 @@
 // boards/seeeduino_xiao_ble.overlay 側でpinctrlを追加してください。
 // ----------------------------------------------------
 &spi3 {
-    status = "disabled";
+    status = "okay";
     cs-gpios = <&xiao_d 7 GPIO_ACTIVE_LOW>;
 
     trackball: trackball@0 {
@@ -90,7 +90,7 @@
         spi-max-frequency = <2000000>;
 
         // モーション割り込みピン。空いているピンに合わせて要変更。
-        irq-gpios = <&xiao_d 0 GPIO_ACTIVE_LOW>;
+        motion-gpios = <&xiao_d 0 GPIO_ACTIVE_LOW>;
 
         // 19mmボール + PMW3610の一般的な運用値。感度は用途に応じて調整。
         cpi = <800>;
